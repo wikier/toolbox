@@ -1,24 +1,25 @@
 ## Style
 
 - Write common English
-- Brief but concise is better than longwinded
+- Brief and clear
 - Don't use em-dashes
 
 ## Cooperation
 
-- Do not assume, ask if you there is ambiguity
-- Act always in a chalenging way, be self-critic
+- Do not assume, ask if there is any ambiguity
+- Act always in a challenging way, use self-criticism
+- If you feel there is an obvious counterpart that will review the output, act as them
 
 ## Workflow Orchestration
 
-### 1. Plan Node Default
+### 1. Plan Mode as Default
 Plan mode for ANY non-trivial task (3+ steps or arch decisions). Something goes sideways: STOP, re-plan, don't push. Plan mode for verification too, not just building. Write detailed specs upfront.
 
 ### 2. Subagent Strategy
-- Use subagents liberally — keep main context clean
+- Use subagents liberally, keep main context clean
 - Offload research, exploration, parallel analysis to subagents
 - Complex problems: throw more compute via subagents
-- One tack per subagent
+- One task per subagent
 
 ### 3. Self-Improvement Loop
 - After ANY correction: update `tasks/lessons.md`. Write rules preventing same mistake.
@@ -53,36 +54,38 @@ Non-trivial changes: ask "more elegant way?" Hacky fix: implement elegant soluti
 - git for versions. Init repo if missing.
 - Ignore artifacts: app outputs, OS stuff (`.DS_Store`, `.idea`, etc.)
 - Spinout new worktree for current working set
-- Ask if I want to commit every iteration (project dependant): `[step <n>] <prompt>`
+- Ask if I want to commit every iteration (project dependent): `[step <n>] <prompt>`
 - PR: squash all worktree commits, ask for details
 
-### Autonomous Bug Fixing
-Bug report: just fix it. No hand-holding.
-- Use logs, errors, failing tests — resolve them
-- Zero context switching from user
-- Fix failing CI tests without being told how
+### Bug Fixing
+- Report bugs
+- Fix without asking only if there is a clear bug
+- Otherwise, provide context on how the bug happens and provide recommendations before acting
+
+#### Available Scripts
+Use a `justfile` to abstract task from the specific stack:
+- `just install`: Installs dependencies
+- `just lint`: Runs linters 
+- `just build`: builds the code (if it applies)
+- `just start`: Starts the application/server
+- `just test`: Runs tests
+
+#### Project Structure
+- App logic: `/src`
+- Tests: `/tests` uses `pytest`
+- Config: `/config`
 
 ### Python coding
 
+(Only for Python projects, ignore otherwise)
+
 #### General Instructions
-- All Python code must be [PEP 8](https://www.python.org) compliant.
+- All Python code must be [PEP 8](https://peps.python.org/pep-0008/) compliant.
 - 4 spaces indent, never tabs.
 - All new functions/classes: docstrings (Google Style).
 - Before file mod or shell command: present plan for review.
 
-#### Project Structure
-- App logic: `/src`
-- Tests: `/tests` — uses `pytest`
-- Config: `/config`
-
 #### Dependencies
-- Follow  PEP 668, so use a virtual environment (`.venv/`)
-- Managed via `pip3`, specified in `requirements.txt`
-- Dependencies are declare in the pyproject toml file int he root of the project 
+- Follow PEP 668, so use a virtual environment (`.venv/`)
+- Dependencies are declared in the pyproject.toml file in the root of the project 
   and managed with `uv`
-
-#### Available Scripts
-*   `just install`: Installs dependencies.
-*   `just start`: Starts the application server (runs `python src/app.py`).
-*   `just test`: Runs tests using `pytest`.
-*   `just lint`: Runs linters (e.g., `flake8`, `mypy`).

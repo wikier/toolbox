@@ -1,0 +1,50 @@
+default: install
+
+diff:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    target="$HOME/.claude/CLAUDE.md"
+
+    if [ ! -f "$target" ]; then
+        echo "No existing $target." >&2
+        echo "overwrite"
+        exit 0
+    fi
+
+    if diff -q CLAUDE.md "$target" > /dev/null; then
+        echo "$target is already up to date." >&2
+        echo "skip"
+        exit 0
+    fi
+
+    diff_output=$(diff -u "$target" CLAUDE.md || true)
+
+    echo "Differences ($target -> CLAUDE.md):" >&2
+    echo >&2
+    echo "$diff_output" >&2
+    echo >&2
+
+    if command -v claude > /dev/null 2>&1; then
+        echo "Explanation:" >&2
+        echo "$diff_output" | claude -p "Briefly explain in plain English what this diff changes about the CLAUDE.md instructions." >&2
+        echo >&2
+    fi
+
+    read -rp "Overwrite $target with CLAUDE.md? [y/N] " answer
+    case "$answer" in
+        [Yy]*) echo "overwrite" ;;
+        *) echo "skip" ;;
+    esac
+
+install:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    decision=$(just diff)
+    target="$HOME/.claude/CLAUDE.md"
+
+    if [ "$decision" = "overwrite" ]; then
+        cp CLAUDE.md "$target"
+        echo "Installed CLAUDE.md to $target."
+    else
+        echo "Skipped."
+    fi
