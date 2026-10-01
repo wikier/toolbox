@@ -3,6 +3,7 @@ function syncBusy() {
   const start = new Date(); start.setHours(0, 0, 0, 0);
   const end = new Date(start.getTime() + 30 * 864e5); // 1 month ahead
   const work = CalendarApp.getDefaultCalendar();
+  const BUFFER = 15 * 6e4; // 15 min travel buffer before and after
 
   // Busy, timed events from the personal calendar, keyed by event ID
   const src = new Map();
@@ -12,7 +13,9 @@ function syncBusy() {
   }).items || [])
     .filter(e => e.status !== 'cancelled' && e.transparency !== 'transparent' && e.start.dateTime)
     .forEach(e => src.set(e.id, {
-      title: e.summary || 'Personal Busy', s: new Date(e.start.dateTime), f: new Date(e.end.dateTime)
+      title: e.summary || 'Personal Busy',
+      s: new Date(new Date(e.start.dateTime).getTime() - BUFFER),
+      f: new Date(new Date(e.end.dateTime).getTime() + BUFFER)
     }));
 
   // Update or delete existing copies
