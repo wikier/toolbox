@@ -5,13 +5,16 @@ function syncBusy() {
   const work = CalendarApp.getDefaultCalendar();
   const BUFFER = 15 * 6e4; // 15 min travel buffer before and after
 
-  // Busy, timed events from the personal calendar, keyed by event ID
+  const isWeekday = d => d.getDay() % 6 !== 0; // 0 = Sunday, 6 = Saturday
+
+  // Busy, timed weekday events from the personal calendar, keyed by event ID
   const src = new Map();
   (Calendar.Events.list(PERSONAL, {
     timeMin: start.toISOString(), timeMax: end.toISOString(),
     singleEvents: true, maxResults: 2500
   }).items || [])
-    .filter(e => e.status !== 'cancelled' && e.transparency !== 'transparent' && e.start.dateTime)
+    .filter(e => e.status !== 'cancelled' && e.transparency !== 'transparent' && e.start.dateTime
+      && isWeekday(new Date(e.start.dateTime)))
     .forEach(e => src.set(e.id, {
       title: e.summary || 'Personal Busy',
       s: new Date(new Date(e.start.dateTime).getTime() - BUFFER),
