@@ -5,7 +5,8 @@ function syncBusy() {
   const work = CalendarApp.getDefaultCalendar();
   const BUFFER = 15 * 6e4; // 15 min travel buffer before and after
 
-  const isWeekday = d => d.getDay() % 6 !== 0; // 0 = Sunday, 6 = Saturday
+  const TZ = 'America/Vancouver'; // weekdays are judged in Pacific time
+  const isWeekday = d => Number(Utilities.formatDate(d, TZ, 'u')) <= 5; // 1 = Monday, 7 = Sunday
 
   // Busy, timed weekday events from the personal calendar, keyed by event ID
   const src = new Map();
