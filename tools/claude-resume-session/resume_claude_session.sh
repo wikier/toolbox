@@ -67,7 +67,8 @@ confirm_resume() {
 # 6. Execute the resume command.
 resume_claude_session() {
     local session_id="$1"
-    exec claude --resume "${session_id}"
+    shift
+    exec claude --resume "${session_id}" "$@"
 }
 exec_claude() {
     exec claude
@@ -87,7 +88,7 @@ main() {
     session_id="$(parse_session_id "$session_file")"
 
     if confirm_resume "$session_id"; then
-        resume_claude_session "$session_id"
+        resume_claude_session "$session_id" "$@"
     else
         exec_claude
     fi
