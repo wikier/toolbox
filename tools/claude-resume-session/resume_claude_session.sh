@@ -7,6 +7,7 @@
 set -euo pipefail
 
 CLAUDE_PROJECTS_DIR="${HOME}/.claude/projects"
+CLAUDE_DEFAULT_ARGS=(--model sonnet --advisor opus)
 
 # 1. Get the current working directory.
 get_cwd() {
@@ -68,10 +69,10 @@ confirm_resume() {
 resume_claude_session() {
     local session_id="$1"
     shift
-    exec claude --resume "${session_id}" "$@"
+    exec claude "${CLAUDE_DEFAULT_ARGS[@]}" --resume "${session_id}" "$@"
 }
 exec_claude() {
-    exec claude
+    exec claude "${CLAUDE_DEFAULT_ARGS[@]}"
 }
 
 main() {
