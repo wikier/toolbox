@@ -1,0 +1,9 @@
+install:
+    ./install.sh
+
+lint:
+    bash -n git_worktree_auto_prune.sh install.sh tests/test_auto_prune.sh
+    if command -v shellcheck >/dev/null; then shellcheck git_worktree_auto_prune.sh install.sh tests/test_auto_prune.sh; fi
+
+test:
+    bash tests/test_auto_prune.sh
