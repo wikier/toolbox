@@ -163,6 +163,95 @@ test_dry_run() {
     teardown
 }
 
+test_dry_run_short_flag() {
+    setup
+    add_wt dry
+    mark_merged dry
+    local out
+    out="$(run -d)"
+    assert "-d keeps worktree" test -d "$(wt_path dry)"
+    assert "-d reports" grep -q "would remove" <<<"$out"
+    teardown
+}
+
+test_force_removes_dirty() {
+    setup
+    add_wt dirty
+    mark_merged dirty
+    touch "$(wt_path dirty)/untracked.txt"
+    run --force >/dev/null
+    assert "force removes dirty worktree" test ! -d "$(wt_path dirty)"
+    assert "force deletes dirty branch" bash -c "! git -C '$REPO' show-ref --quiet refs/heads/dirty"
+    teardown
+}
+
+test_force_removes_extra_commits() {
+    setup
+    add_wt extra
+    mark_merged extra
+    git -C "$(wt_path extra)" commit -q --allow-empty -m "after merge"
+    run -f >/dev/null
+    assert "force removes worktree with new commits" test ! -d "$(wt_path extra)"
+    teardown
+}
+
+test_force_removes_locked() {
+    setup
+    add_wt locked
+    mark_merged locked
+    git -C "$REPO" worktree lock "$(wt_path locked)"
+    run -f >/dev/null
+    assert "force removes locked worktree" test ! -d "$(wt_path locked)"
+    teardown
+}
+
+test_force_keeps_hard_skips() {
+    setup
+    add_wt open
+    add_wt here
+    mark_merged here
+    git -C "$REPO" worktree add -q --detach "${WT_ROOT}/detached"
+    (cd "$(wt_path here)" && bash "$SCRIPT" -f) >/dev/null 2>&1
+    assert "force keeps unmerged worktree" test -d "$(wt_path open)"
+    assert "force keeps current worktree" test -d "$(wt_path here)"
+    assert "force keeps detached worktree" test -d "${WT_ROOT}/detached"
+    teardown
+}
+
+test_force_dry_run() {
+    setup
+    add_wt dirty
+    mark_merged dirty
+    touch "$(wt_path dirty)/untracked.txt"
+    local out
+    out="$(run -f -d)"
+    assert "force dry run keeps worktree" test -d "$(wt_path dirty)"
+    assert "force dry run reports reason" grep -q "would remove.*uncommitted" <<<"$out"
+    teardown
+}
+
+test_safe_force_declined() {
+    setup
+    add_wt dirty
+    mark_merged dirty
+    touch "$(wt_path dirty)/untracked.txt"
+    local out
+    out="$(cd "$REPO" && echo n | bash "$SCRIPT" -s -f 2>&1)"
+    assert "safe+force 'n' keeps worktree" test -d "$(wt_path dirty)"
+    assert "safe+force prompt names reason" grep -q "uncommitted" <<<"$out"
+    teardown
+}
+
+test_safe_force_accepted() {
+    setup
+    add_wt dirty
+    mark_merged dirty
+    touch "$(wt_path dirty)/untracked.txt"
+    (cd "$REPO" && echo y | bash "$SCRIPT" -s -f) >/dev/null 2>&1
+    assert "safe+force 'y' removes worktree" test ! -d "$(wt_path dirty)"
+    teardown
+}
+
 test_skips_current_worktree() {
     setup
     add_wt here
