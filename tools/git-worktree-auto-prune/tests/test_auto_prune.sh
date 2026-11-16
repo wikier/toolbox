@@ -22,6 +22,10 @@ setup() {
     FAKE_GH_DIR="${SANDBOX}/gh-data"
     mkdir -p "$REPO" "$WT_ROOT" "$FAKE_GH_DIR" "${SANDBOX}/bin"
 
+    # Ignore the user's global/system git config (commit signing, hooks, etc.).
+    export GIT_CONFIG_GLOBAL=/dev/null
+    export GIT_CONFIG_NOSYSTEM=1
+
     git -C "$REPO" init -q -b main
     git -C "$REPO" config user.email t@t
     git -C "$REPO" config user.name t
