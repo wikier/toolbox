@@ -75,8 +75,25 @@ exec_claude() {
     exec claude "${CLAUDE_DEFAULT_ARGS[@]}"
 }
 
+# Returns success if the caller already asked Claude to resume or continue
+# a session. Scanning stops at "--", since anything after it is prompt text.
+has_resume_flag() {
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+            --) return 1 ;;
+            -r|--resume|--resume=*|-c|--continue) return 0 ;;
+        esac
+    done
+    return 1
+}
+
 main() {
     local cwd project_dir session_file session_id
+
+    if has_resume_flag "$@"; then
+        exec claude "${CLAUDE_DEFAULT_ARGS[@]}" "$@"
+    fi
 
     cwd="$(get_cwd)"
     project_dir="$(map_cwd_to_project_dir "$cwd")"
